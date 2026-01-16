@@ -1,0 +1,196 @@
+package com.foodiego.config;
+
+import com.foodiego.model.*;
+import com.foodiego.repository.*;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+@Configuration
+@RequiredArgsConstructor
+@Slf4j
+public class DataInitializer {
+
+    private final PasswordEncoder passwordEncoder;
+
+    @Bean
+    CommandLineRunner initDatabase(UserRepository userRepository,
+                                    RestaurantRepository restaurantRepository,
+                                    MenuItemRepository menuItemRepository) {
+        return args -> {
+            log.info("Initializing database with sample data...");
+
+            Set<String> adminRoles = new HashSet<>();
+            adminRoles.add("ROLE_ADMIN");
+
+            // Create restaurant owners
+            User owner1 = createUser("lamama", "owner1@foodiego.com", "password123", "Maria Popescu", adminRoles, userRepository);
+            User owner2 = createUser("napoli", "owner2@foodiego.com", "password123", "Giovanni Rossi", adminRoles, userRepository);
+            User owner3 = createUser("sushimaster", "owner3@foodiego.com", "password123", "Takeshi Yamamoto", adminRoles, userRepository);
+            User owner4 = createUser("burgerjoint", "owner4@foodiego.com", "password123", "John Smith", adminRoles, userRepository);
+
+            // Create restaurants
+            Restaurant restaurant1 = createRestaurant(
+                    "La Mama",
+                    "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80",
+                    "Românească",
+                    4.8,
+                    324,
+                    "25-35 min",
+                    0.0,
+                    35.0,
+                    true,
+                    "Strada Victoriei 45",
+                    Arrays.asList("Tradițional", "Supe", "Grătar"),
+                    owner1,
+                    restaurantRepository
+            );
+
+            Restaurant restaurant2 = createRestaurant(
+                    "Pizzeria Napoli",
+                    "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80",
+                    "Italiană",
+                    4.6,
+                    567,
+                    "20-30 min",
+                    5.0,
+                    30.0,
+                    true,
+                    "Bulevardul Unirii 123",
+                    Arrays.asList("Pizza", "Paste", "Salate"),
+                    owner2,
+                    restaurantRepository
+            );
+
+            Restaurant restaurant3 = createRestaurant(
+                    "Sushi Master",
+                    "https://images.unsplash.com/photo-1579027989536-b7b1f875659b?w=800&q=80",
+                    "Japoneză",
+                    4.9,
+                    289,
+                    "30-45 min",
+                    10.0,
+                    50.0,
+                    true,
+                    "Calea Dorobanților 78",
+                    Arrays.asList("Sushi", "Ramen", "Tempura"),
+                    owner3,
+                    restaurantRepository
+            );
+
+            Restaurant restaurant4 = createRestaurant(
+                    "Burger Joint",
+                    "https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=800&q=80",
+                    "Americană",
+                    4.5,
+                    892,
+                    "15-25 min",
+                    7.0,
+                    25.0,
+                    true,
+                    "Strada Lipscani 34",
+                    Arrays.asList("Burgeri", "Cartofi", "Milkshake"),
+                    owner4,
+                    restaurantRepository
+            );
+
+            // Create menu items for La Mama
+            createMenuItem(restaurant1, "Sarmale în foi de viță", "Sarmale tradiționale cu carne tocată și orez, servite cu smântână și mămăligă",
+                    32.0, "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80", "Tradițional", true, false, menuItemRepository);
+
+            createMenuItem(restaurant1, "Ciorbă de burtă", "Ciorbă tradițională de burtă cu smântână și ardei iute",
+                    22.0, "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&q=80", "Supe", true, false, menuItemRepository);
+
+            createMenuItem(restaurant1, "Mici la grătar", "10 mici la grătar serviti cu muștar și pâine proaspătă",
+                    28.0, "https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=80", "Grătar", true, false, menuItemRepository);
+
+            createMenuItem(restaurant1, "Mămăligă cu brânză și smântână", "Mămăligă caldă cu brânză topită și smântână proaspătă",
+                    18.0, "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80", "Tradițional", false, true, menuItemRepository);
+
+            // Create menu items for Pizzeria Napoli
+            createMenuItem(restaurant2, "Pizza Margherita", "Sos de roșii, mozzarella, busuioc proaspăt",
+                    28.0, "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400&q=80", "Pizza", true, true, menuItemRepository);
+
+            createMenuItem(restaurant2, "Pizza Quattro Formaggi", "Mozzarella, gorgonzola, parmezan, ricotta",
+                    38.0, "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80", "Pizza", false, true, menuItemRepository);
+
+            createMenuItem(restaurant2, "Spaghetti Carbonara", "Paste cu bacon, ou, parmezan și piper negru",
+                    32.0, "https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400&q=80", "Paste", true, false, menuItemRepository);
+
+            createMenuItem(restaurant2, "Salată Caesar", "Salată verde, crutoane, parmezan, dressing Caesar",
+                    24.0, "https://images.unsplash.com/photo-1546793665-c74683f339c1?w=400&q=80", "Salate", false, false, menuItemRepository);
+
+            // Create menu items for Sushi Master
+            createMenuItem(restaurant3, "Dragon Roll", "8 piese cu anghilă, avocado și sos unagi",
+                    48.0, "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&q=80", "Sushi", true, false, menuItemRepository);
+
+            createMenuItem(restaurant3, "Salmon Nigiri Set", "6 piese nigiri cu somon proaspăt",
+                    42.0, "https://images.unsplash.com/photo-1617196034796-73dfa7b1fd56?w=400&q=80", "Sushi", false, false, menuItemRepository);
+
+            createMenuItem(restaurant3, "Ramen Tonkotsu", "Supă cremoasă cu porc, ou fiert, noodles și ceapă verde",
+                    38.0, "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&q=80", "Ramen", true, false, menuItemRepository);
+
+            // Create menu items for Burger Joint
+            createMenuItem(restaurant4, "Classic Cheeseburger", "Burger cu carne de vită, cheddar, salată, roșii, ceapă, sos special",
+                    32.0, "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80", "Burgeri", true, false, menuItemRepository);
+
+            createMenuItem(restaurant4, "Bacon BBQ Burger", "Burger cu bacon crispy, ceapă caramelizată și sos BBQ",
+                    38.0, "https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=400&q=80", "Burgeri", true, false, menuItemRepository);
+
+            createMenuItem(restaurant4, "Cartofi prăjiți", "Porție mare de cartofi prăjiți crispy cu sos ranch",
+                    14.0, "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&q=80", "Cartofi", false, true, menuItemRepository);
+
+            log.info("Database initialization completed successfully!");
+        };
+    }
+
+    private User createUser(String username, String email, String password, String fullName, Set<String> roles, UserRepository userRepository) {
+        if (userRepository.existsByUsername(username)) {
+            return userRepository.findByUsername(username).orElseThrow();
+        }
+        User user = new User(username, email, passwordEncoder.encode(password), fullName, roles);
+        return userRepository.save(user);
+    }
+
+    private Restaurant createRestaurant(String name, String image, String cuisine, Double rating, Integer reviewCount,
+                                        String deliveryTime, Double deliveryFee, Double minOrder, Boolean isOpen,
+                                        String address, List<String> categories, User owner, RestaurantRepository restaurantRepository) {
+        Restaurant restaurant = new Restaurant();
+        restaurant.setName(name);
+        restaurant.setImage(image);
+        restaurant.setCuisine(cuisine);
+        restaurant.setRating(rating);
+        restaurant.setReviewCount(reviewCount);
+        restaurant.setDeliveryTime(deliveryTime);
+        restaurant.setDeliveryFee(deliveryFee);
+        restaurant.setMinOrder(minOrder);
+        restaurant.setIsOpen(isOpen);
+        restaurant.setAddress(address);
+        restaurant.setCategories(categories);
+        restaurant.setOwner(owner);
+        return restaurantRepository.save(restaurant);
+    }
+
+    private void createMenuItem(Restaurant restaurant, String name, String description, Double price, String image,
+                                String category, Boolean isPopular, Boolean isVegetarian, MenuItemRepository menuItemRepository) {
+        MenuItem menuItem = new MenuItem();
+        menuItem.setRestaurant(restaurant);
+        menuItem.setName(name);
+        menuItem.setDescription(description);
+        menuItem.setPrice(price);
+        menuItem.setImage(image);
+        menuItem.setCategory(category);
+        menuItem.setIsPopular(isPopular);
+        menuItem.setIsVegetarian(isVegetarian);
+        menuItem.setAvailable(true);
+        menuItemRepository.save(menuItem);
+    }
+}
